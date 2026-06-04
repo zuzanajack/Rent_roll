@@ -695,7 +695,37 @@
     color: var(--ink-3);
     margin-bottom: 6px;
     font-weight: 500;
+    display: flex; align-items: center; gap: 4px;
   }
+
+  /* Inline info icon for tooltips */
+  .tt-ico {
+    display: inline-flex; align-items: center; flex-shrink: 0;
+    color: var(--ink-4); cursor: default;
+    transition: color .12s;
+  }
+  .tt-ico:hover { color: var(--ink-2); }
+
+  /* Floating tooltip bubble */
+  #tip {
+    position: fixed;
+    z-index: 99999;
+    pointer-events: none;
+    max-width: 260px;
+    background: var(--ink);
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 400;
+    line-height: 1.45;
+    padding: 7px 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.18);
+    opacity: 0;
+    transition: opacity .1s ease;
+    white-space: normal;
+    word-break: break-word;
+  }
+  #tip.vis { opacity: 1; }
   .summary-tile .value {
     font-size: 22px;
     color: var(--ink);
@@ -1072,25 +1102,17 @@
     border-bottom: 1px solid var(--line);
   }
   .exp-title { font-size: 15px; font-weight: 600; flex: 1; color: var(--ink); }
-  .exp-body { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+  .exp-body { padding: 22px 20px; display: flex; flex-direction: column; gap: 22px; }
   .exp-foot {
     padding: 14px 20px;
     border-top: 1px solid var(--line);
     display: flex; justify-content: flex-end; gap: 8px;
   }
-  .exp-field { display: flex; flex-direction: column; }
+  .exp-field { display: flex; flex-direction: column; gap: 7px; }
   .exp-field-label {
     font-size: 11px; font-weight: 600; color: var(--ink-3);
-    text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px;
+    text-transform: uppercase; letter-spacing: .05em;
   }
-  .exp-radio-group { display: flex; gap: 20px; }
-  .exp-radio {
-    display: flex; align-items: center; gap: 7px;
-    font-size: 14px; color: var(--ink-2); cursor: pointer;
-  }
-  .exp-radio input[type=radio] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; outline: none; }
-  .exp-radio input[type=radio]:focus,
-  .exp-radio input[type=radio]:focus-visible { outline: none; }
   /* Export period segmented: stretch to full width */
   #exp-period { display: flex; width: 100%; }
   #exp-period button { flex: 1; min-width: 0; }
@@ -1101,8 +1123,39 @@
     padding: 8px 10px; cursor: pointer; outline: none; width: 100%;
   }
   .exp-select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-tint); }
-  .exp-section { display: flex; flex-direction: column; gap: 12px; }
-  .exp-section.hidden { display: none; }
+  .exp-select:disabled { opacity: 0.45; cursor: default; }
+  /* Data level radio cards */
+  .exp-level-group { display: flex; flex-direction: column; gap: 6px; }
+  .exp-level-card {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    transition: border-color .12s, background .12s;
+  }
+  .exp-level-card:hover { border-color: var(--line-strong); background: var(--surface-2); }
+  .exp-level-card input[type=radio] {
+    appearance: none; -webkit-appearance: none;
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 1.5px solid var(--line-strong);
+    background: var(--surface);
+    margin-top: 2px; flex-shrink: 0;
+    cursor: pointer;
+    transition: border-color .12s, background .12s, box-shadow .12s;
+  }
+  .exp-level-card input[type=radio]:checked {
+    border-color: var(--accent);
+    background: var(--accent);
+    box-shadow: inset 0 0 0 3px var(--surface);
+  }
+  .exp-level-card input[type=radio]:focus,
+  .exp-level-card input[type=radio]:focus-visible { outline: none; }
+  .exp-level-card:has(input:checked) { border-color: var(--accent); background: var(--accent-tint); }
+  .exp-level-title { font-size: 13.5px; font-weight: 500; color: var(--ink); display: block; margin-bottom: 2px; }
+  .exp-level-desc { font-size: 12px; color: var(--ink-3); display: block; }
+  .exp-hint { font-size: 11.5px; color: var(--ink-3); margin: 0; }
+  .exp-hint.hidden { display: none; }
   .exp-spinner {
     display: none; width: 14px; height: 14px; flex-shrink: 0;
     border: 2px solid rgba(255,255,255,.35); border-top-color: #fff;
@@ -1239,6 +1292,7 @@
             <input type="checkbox" id="vacant-toggle" checked />
             <span class="track"></span>
             <span class="lbl">Show vacant rent</span>
+            <span class="tt-ico" data-tip="Vacant rent is a calculated rent loss during vacancy using unit cost. It is not posted to the accounting system — including it helps you spot irregularities in rent invoicing faster."><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>
           </label>
         </div>
         </div>
@@ -1266,18 +1320,18 @@
 
       <div class="detail-summary">
         <div class="summary-tile">
-          <div class="label">Total</div>
+          <div class="label">Total <span class="tt-ico" data-tip="Combined invoiced rent and estimated vacant rent loss for this month."><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span></div>
           <div class="value" id="detail-total">—</div>
           <div id="detail-total-delta"></div>
         </div>
         <div class="summary-tile">
-          <div class="label">Invoiced</div>
+          <div class="label">Invoiced <span class="tt-ico" data-tip="Total rent charged to tenants via issued invoices for this month, across all active bookings."><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span></div>
           <div class="value" id="detail-invoiced">—</div>
           <div id="detail-reg-info"></div>
           <div id="detail-invoiced-breakdown"></div>
         </div>
         <div class="summary-tile">
-          <div class="label">Vacant</div>
+          <div class="label">Vacant <span class="tt-ico" data-tip="Calculated rent loss from unoccupied units, estimated using the standard monthly cost per unit. Not posted to the accounting system."><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span></div>
           <div class="value" id="detail-vacant">—</div>
           <div id="detail-vacant-breakdown"></div>
         </div>
@@ -1289,6 +1343,9 @@
     </section>
   </main>
 </div>
+
+<!-- Tooltip bubble — must be in DOM before inline <script> runs -->
+<div id="tip"></div>
 
 <!-- ============================================================
      EXPORT MODAL — must be in DOM before inline <script> runs
@@ -1304,24 +1361,36 @@
     <div class="exp-body">
 
       <div class="exp-field">
-        <span class="exp-field-label">Entity</span>
-        <select id="exp-entity" class="exp-select"></select>
+        <span class="exp-field-label">Data level</span>
+        <div class="exp-level-group">
+          <label class="exp-level-card">
+            <input type="radio" name="exp-level" value="portfolio" id="exp-lvl-portfolio">
+            <div>
+              <span class="exp-level-title">Portfolio summary</span>
+              <span class="exp-level-desc">All entities combined · one file</span>
+            </div>
+          </label>
+          <label class="exp-level-card">
+            <input type="radio" name="exp-level" value="entity" id="exp-lvl-entity" checked>
+            <div>
+              <span class="exp-level-title">Entity totals</span>
+              <span class="exp-level-desc">Rent roll pivot · one file per entity</span>
+            </div>
+          </label>
+          <label class="exp-level-card">
+            <input type="radio" name="exp-level" value="detail" id="exp-lvl-detail">
+            <div>
+              <span class="exp-level-title">Full detail</span>
+              <span class="exp-level-desc">Rent roll + monthly charges · one file per entity</span>
+            </div>
+          </label>
+        </div>
       </div>
 
       <div class="exp-field">
-        <span class="exp-field-label">Options</span>
-        <div class="exp-section">
-          <label class="switch">
-            <input type="checkbox" id="exp-vacant" checked>
-            <span class="track"></span>
-            <span class="lbl">Include vacant rent</span>
-          </label>
-          <label class="switch">
-            <input type="checkbox" id="exp-charges">
-            <span class="track"></span>
-            <span class="lbl">Include charges detail</span>
-          </label>
-        </div>
+        <span class="exp-field-label">Entity</span>
+        <select id="exp-entity" class="exp-select"></select>
+        <p id="exp-entity-hint" class="exp-hint hidden">Portfolio always includes all entities</p>
       </div>
 
       <div class="exp-field">
@@ -1344,6 +1413,15 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <div class="exp-field">
+        <label class="switch">
+          <input type="checkbox" id="exp-vacant" checked>
+          <span class="track"></span>
+          <span class="lbl">Include vacant rent</span>
+          <span class="tt-ico" data-tip="Vacant rent is a calculated rent loss during vacancy using unit cost. It is not posted to the accounting system — including it helps you spot irregularities in rent invoicing faster."><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>
+        </label>
       </div>
 
     </div>
@@ -1694,7 +1772,7 @@ function renderCell(c, delta = 0) {
   const UP_SVG   = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>`;
   const DOWN_SVG = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>`;
   const deltaHtml = delta !== 0
-    ? `<span class="cell-delta ${delta > 0 ? 'cell-delta-up' : 'cell-delta-down'}">${delta > 0 ? UP_SVG : DOWN_SVG}${delta > 0 ? '+' : '−'}${fmtKr(Math.abs(delta))}</span>`
+    ? `<span class="cell-delta ${delta > 0 ? 'cell-delta-up' : 'cell-delta-down'}" data-tip="Difference in total rent vs. previous month.">${delta > 0 ? UP_SVG : DOWN_SVG}${delta > 0 ? '+' : '−'}${fmtKr(Math.abs(delta))}</span>`
     : '';
 
   if (!state.vacantOn) {
@@ -1869,11 +1947,7 @@ $roll.addEventListener('click', (ev) => {
   const td = ev.target.closest('td.cell');
   if (!td) return;
   ev.stopPropagation();
-  if (td.classList.contains('flagged')) {
-    openPopover(td);
-  } else {
-    goToDetailed(td.dataset.entity, +td.dataset.y, +td.dataset.m);
-  }
+  goToDetailed(td.dataset.entity, +td.dataset.y, +td.dataset.m);
 });
 
 
@@ -2199,7 +2273,7 @@ function renderDetailCharges(entity, y, m, c, prevCell, newTenByIds = {}) {
               <th class="sortable" onclick="sortChargesTable(this)">Accounting period <span class="sort-ico" aria-hidden="true">⇅</span></th>
               <th class="sortable" onclick="sortChargesTable(this)">Unit <span class="sort-ico" aria-hidden="true">⇅</span></th>
               <th class="sortable" onclick="sortChargesTable(this)">Payer name <span class="sort-ico" aria-hidden="true">⇅</span></th>
-              <th class="sortable" onclick="sortChargesTable(this)">Payer accounting no. <span class="sort-ico" aria-hidden="true">⇅</span></th>
+              <th class="sortable" onclick="sortChargesTable(this)">Payer accounting no. <span class="tt-ico" data-tip="Internal accounting identifier linked to the payer, used for ledger reconciliation." style="vertical-align:middle;margin:0 2px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span><span class="sort-ico" aria-hidden="true">⇅</span></th>
               <th class="sortable" onclick="sortChargesTable(this)">Invoicing product <span class="sort-ico" aria-hidden="true">⇅</span></th>
               <th class="sortable" onclick="sortChargesTable(this)">Invoice ID <span class="sort-ico" aria-hidden="true">⇅</span></th>
               <th class="num sortable" onclick="sortChargesTable(this)">Amount <span class="sort-ico" aria-hidden="true">⇅</span></th>
@@ -2263,8 +2337,10 @@ function goToDetailed(entityId, y, m) {
   const skuHtml = Object.entries(c.invoicedByProduct).map(([prod, amt]) => {
     const delta = Math.round(amt - (prevByProduct[prod] || 0));
     const name  = prod;
-    let deltaHtml = '';
-    if (delta !== 0) {
+    let deltaHtml;
+    if (delta === 0) {
+      deltaHtml = ` <span class="inv-sku-delta" style="color:var(--ink-2)">${_upT} 0 kr</span>`;
+    } else {
       const cls = delta > 0 ? 'up' : 'dn';
       const ico = delta > 0 ? _upT : _dnT;
       const sgn = delta > 0 ? '+' : '−';
@@ -2284,8 +2360,10 @@ function goToDetailed(entityId, y, m) {
   const vacSkuHtml = Object.entries(c.vacantByProduct).map(([prod, amt]) => {
     const delta = Math.round(amt - (prevVacByProduct[prod] || 0));
     const name  = prod;
-    let deltaHtml = '';
-    if (delta !== 0) {
+    let deltaHtml;
+    if (delta === 0) {
+      deltaHtml = ` <span class="inv-sku-delta" style="color:var(--ink-2)">${_upT} 0 kr</span>`;
+    } else {
       const cls = delta > 0 ? 'up' : 'dn';
       const ico = delta > 0 ? _upT : _dnT;
       const sgn = delta > 0 ? '+' : '−';
@@ -2305,7 +2383,7 @@ function goToDetailed(entityId, y, m) {
     const col = totalDelta > 0 ? '#2A7D4F' : '#C0392B';
     const ico = totalDelta > 0 ? _up : _dn;
     const lbl = totalDelta > 0 ? `+${fmtKr(totalDelta)}` : `−${fmtKr(Math.abs(totalDelta))}`;
-    $td.innerHTML = `<div class="reg-tile-info" style="color:${col}">${ico} ${lbl} vs. ${MONTHS_EN[_pd.getMonth()]} ${_pd.getFullYear()}</div>`;
+    $td.innerHTML = `<div class="reg-tile-info" style="color:${col}" data-tip="Difference in total rent vs. previous month.">${ico} ${lbl} vs. ${MONTHS_EN[_pd.getMonth()]} ${_pd.getFullYear()}</div>`;
   } else {
     $td.innerHTML = '';
   }
@@ -2444,7 +2522,6 @@ function applyChargesFilter(filterKey, rowEl) {
    ============================================================ */
 (function initExportModal() {
   const sel = document.getElementById('exp-entity');
-  // "All entities" as first option
   const allOpt = document.createElement('option');
   allOpt.value = ''; allOpt.textContent = 'All entities';
   sel.appendChild(allOpt);
@@ -2452,6 +2529,15 @@ function applyChargesFilter(filterKey, rowEl) {
     const opt = document.createElement('option');
     opt.value = e.id; opt.textContent = e.name;
     sel.appendChild(opt);
+  });
+  // Lock entity selector to All entities when Portfolio level is selected
+  document.querySelectorAll('input[name="exp-level"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const isPortfolio = document.getElementById('exp-lvl-portfolio').checked;
+      sel.disabled = isPortfolio;
+      if (isPortfolio) sel.value = '';
+      document.getElementById('exp-entity-hint').classList.toggle('hidden', !isPortfolio);
+    });
   });
 })();
 
@@ -2512,10 +2598,10 @@ function runExport() {
   const mths           = activeBtn.dataset.months === 'custom'
     ? exportMonthsCustom()
     : exportMonths(parseInt(activeBtn.dataset.months, 10));
-  const includeVacant  = document.getElementById('exp-vacant').checked;
-  const includeCharges = document.getElementById('exp-charges').checked;
-  const entityVal      = document.getElementById('exp-entity').value;
-  const entitiesToExport = entityVal === ''
+  const level        = document.querySelector('input[name="exp-level"]:checked')?.value || 'entity';
+  const includeVacant = document.getElementById('exp-vacant').checked;
+  const entityVal    = document.getElementById('exp-entity').value;
+  const entitiesToExport = (level === 'portfolio' || entityVal === '')
     ? ENTITIES
     : [ENTITIES.find(e => e.id === entityVal)].filter(Boolean);
 
@@ -2535,15 +2621,21 @@ function runExport() {
 
   setTimeout(() => {
     try {
-      entitiesToExport.forEach((entity, idx) => {
-        setTimeout(() => {
-          const wb = XLSX.utils.book_new();
-          addRentRollSheet(wb, entity, mths, includeVacant, prods);
-          if (includeCharges) addChargesSheets(wb, entity, mths);
-          const safeName = entity.name.replace(/[^\w]/g, '-').replace(/-+/g, '-').toLowerCase();
-          XLSX.writeFile(wb, `${safeName}.xlsx`);
-        }, idx * 300);
-      });
+      if (level === 'portfolio') {
+        const wb = XLSX.utils.book_new();
+        addPortfolioSummarySheet(wb, ENTITIES, mths, includeVacant, prods);
+        XLSX.writeFile(wb, 'portfolio-summary.xlsx');
+      } else {
+        entitiesToExport.forEach((entity, idx) => {
+          setTimeout(() => {
+            const wb = XLSX.utils.book_new();
+            addRentRollSheet(wb, entity, mths, includeVacant, prods);
+            if (level === 'detail') addChargesSheets(wb, entity, mths);
+            const safeName = entity.name.replace(/[^\w]/g, '-').replace(/-+/g, '-').toLowerCase();
+            XLSX.writeFile(wb, `${safeName}.xlsx`);
+          }, idx * 300);
+        });
+      }
     } finally {
       spinner.classList.remove('visible');
       label.textContent = 'Export XLS';
@@ -2603,6 +2695,58 @@ function addRentRollSheet(wb, entity, mths, includeVacant, prods) {
   XLSX.utils.book_append_sheet(wb, ws, 'Rent Roll');
 }
 
+/* ---------- Portfolio summary sheet (all entities combined) ---------- */
+function addPortfolioSummarySheet(wb, entities, mths, includeVacant, prods) {
+  const sum = arr => arr.reduce((a, b) => a + b, 0);
+
+  // Aggregate each month across all entities
+  const cells = mths.map(({y, m}) => {
+    const ec = entities.map(e => getCell(e, y, m));
+    return {
+      total:    sum(ec.map(c => c.total)),
+      invoiced: sum(ec.map(c => c.invoiced)),
+      vacant:   sum(ec.map(c => c.vacant)),
+      invoicedByProduct: prods.reduce((acc, p) => { acc[p] = sum(ec.map(c => c.invoicedByProduct[p] || 0)); return acc; }, {}),
+      vacantByProduct:   prods.reduce((acc, p) => { acc[p] = sum(ec.map(c => c.vacantByProduct[p]   || 0)); return acc; }, {}),
+    };
+  });
+
+  const periodLabel = mths.length === 1
+    ? `${MONTHS_EN[mths[0].m]} ${mths[0].y}`
+    : `${MONTHS_EN[mths[0].m]} ${mths[0].y} – ${MONTHS_EN[mths[mths.length-1].m]} ${mths[mths.length-1].y}`;
+
+  const aoa = [];
+  aoa.push(['Portfolio Summary']);
+  aoa.push([`${entities.length} entities`]);
+  aoa.push([]);
+
+  // ── Totals section ──────────────────────────────────────────
+  aoa.push([`Total (${mths.length} month${mths.length > 1 ? 's' : ''})`, periodLabel]);
+  aoa.push(['Total',          sum(cells.map(c => c.total))]);
+  aoa.push(['Total invoiced', sum(cells.map(c => c.invoiced))]);
+  prods.forEach(p => aoa.push([`  ${p}`, sum(cells.map(c => c.invoicedByProduct[p] || 0))]));
+  if (includeVacant) {
+    aoa.push(['Total vacant', sum(cells.map(c => c.vacant))]);
+    prods.forEach(p => aoa.push([`  ${p}`, sum(cells.map(c => c.vacantByProduct[p] || 0))]));
+  }
+  aoa.push([]);
+
+  // ── Per-month breakdown ──────────────────────────────────────
+  aoa.push(['', ...mths.map(({y, m}) => `${MONTHS_EN[m]} ${y}`)]);
+  aoa.push(['Total',          ...cells.map(c => c.total)]);
+  aoa.push(['Total invoiced', ...cells.map(c => c.invoiced)]);
+  prods.forEach(p => aoa.push([`  ${p}`, ...cells.map(c => c.invoicedByProduct[p] || 0)]));
+  if (includeVacant) {
+    aoa.push(['Total vacant', ...cells.map(c => c.vacant)]);
+    prods.forEach(p => aoa.push([`  ${p}`, ...cells.map(c => c.vacantByProduct[p] || 0)]));
+  }
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{wch: 30}, ...mths.map(() => ({wch: 16}))];
+  fmtWsNumbers(ws);
+  XLSX.utils.book_append_sheet(wb, ws, 'Portfolio Summary');
+}
+
 /* ---------- Charges sheets (one sheet per month, appended to wb) ---------- */
 function addChargesSheets(wb, entity, mths) {
   mths.forEach(({y, m}) => {
@@ -2650,7 +2794,6 @@ function addChargesSheets(wb, entity, mths) {
 
 render();
 </script>
-<div id="tip"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </body>
 </html>
